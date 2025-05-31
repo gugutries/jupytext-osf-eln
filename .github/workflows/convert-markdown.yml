@@ -9,8 +9,7 @@ jobs:
   convert-md-to-ipynb:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -20,7 +19,7 @@ jobs:
       - name: Install Jupytext
         run: pip install jupytext
 
-      - name: Convert Markdown to .ipynb
+      - name: Convert to .ipynb
         run: |
           mkdir -p converted
           for file in notebooks/*.md; do
@@ -28,10 +27,10 @@ jobs:
             jupytext --to ipynb "$file" -o "converted/${base}.ipynb"
           done
 
-      - name: Commit converted notebooks
+      - name: Commit outputs
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add converted/
-          git commit -m "Auto-convert logs to notebooks"
+          git commit -m "Auto-convert Jupytext logs"
           git push
