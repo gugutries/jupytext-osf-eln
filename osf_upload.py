@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 project_id = os.getenv("OSF_PROJECT_ID")
+token = os.getenv("OSF_TOKEN")
 
 def upload_folder(local_folder, remote_folder):
     path = Path(local_folder)
@@ -14,7 +15,8 @@ def upload_folder(local_folder, remote_folder):
             "osf", "-p", project_id,
             "upload", str(file),
             f"/{remote_folder}/{file.name}"
-        ])
+        ], env={"OSF_TOKEN": token})
+
 
 upload_folder("notebooks", "notebooks")
 upload_folder("converted", "converted")
