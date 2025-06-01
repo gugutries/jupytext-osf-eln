@@ -37,14 +37,8 @@ jobs:
           git pull --rebase --autostash
           git push
 
-      - name: Configure OSF CLI
-        run: |
-          mkdir -p ~/.osfclient
-          echo "[osf]" > ~/.osfcli.config
-          echo "token = ${{ secrets.OSF_TOKEN }}" >> ~/.osfcli.config
-
       - name: Upload notebooks and converted logs to OSF
-        run: |
-          python osf_upload.py
+        run: python osf_upload.py
         env:
           OSF_PROJECT_ID: ${{ secrets.OSF_PROJECT_ID }}
+          OSF_TOKEN: ${{ secrets.OSF_TOKEN }}
