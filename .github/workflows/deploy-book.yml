@@ -1,4 +1,4 @@
-name: Build & Deploy ELN
+name: Convert Logs → Build ELN → Deploy to Pages
 
 on:
   push:
@@ -6,31 +6,49 @@ on:
       - 'notebooks/**/*.md'
       - 'intro.md'
       - '_config.yml'
+      - '_static/**'
+      - '.github/workflows/deploy-book.yml'
 
 jobs:
-  eln-site:
+  deploy-eln:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install Jupyter Book + Jupytext
-        run: pip install jupyter-book jupytext
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: Convert .md → .ipynb into `converted/`
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Convert .md to .ipynb only if needed
         run: |
           mkdir -p converted
           for file in notebooks/*.md; do
             base=$(basename "$file" .md)
-            jupytext --to ipynb "$file" -o "converted/${base}.ipynb"
+            ipynb="converted/${base}.ipynb"
+            if [ ! -f "$ipynb" ] || [ "$file" -nt "$ipynb" ]; then
+              echo "Converting $file → $ipynb"
+              jupytext --to ipynb "$file" -o "$ipynb"
+            else
+              echo "Skipping $file (already up-to-date)"
+            fi
           done
 
-      - name: Auto-generate _toc.yml from notebooks/
+      - name: Auto-generate _toc.yml
         run: |
           echo "format: jb-book" > _toc.yml
           echo "root: intro" >> _toc.yml
