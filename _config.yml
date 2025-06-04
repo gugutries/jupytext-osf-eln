@@ -3,5 +3,5 @@ author: "University of Maryland, Department of Psychology"
 logo: logo/umd-sld-logo.png
 only_build_toc_files: true
 html:
-  favicon: logo/umd-favicon.ico
+  favicon: logo/umd-sld-favicon.ico
 
